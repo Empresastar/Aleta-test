@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Monitor Pro - Host</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        :root { --bg: #05070a; --card: #111827; --accent: #3b82f6; --text: #f3f4f6; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; }
+        
+        /* Sidebar de Configurações */
+        .sidebar { width: 250px; background: #0f172a; padding: 20px; border-right: 1px solid #1e293b; height: 100vh; }
+        .main { flex: 1; padding: 40px; overflow-y: auto; }
+        
+        .card { background: var(--card); border-radius: 12px; padding: 20px; border: 1px solid #1e293b; }
+        select, button { width: 100%; padding: 10px; margin-top: 10px; border-radius: 6px; background: #1f2937; color: white; border: 1px solid #374151; cursor: pointer; }
+        
+        .alert-item { background: #1e293b; padding: 15px; border-radius: 10px; border-left: 4px solid var(--accent); margin-bottom: 15px; animation: slideIn 0.3s ease; }
+        .media-content { margin-top: 10px; border-radius: 8px; overflow: hidden; background: #000; }
+        video { width: 100%; max-height: 250px; }
+        .pdf-link { display: inline-block; margin-top: 10px; color: #10b981; text-decoration: none; font-weight: bold; }
+        
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h3>⚙️ Configurações</h3>
+    <label>Escolher Som de Alerta:</label>
+    <select id="selectSom" onchange="salvarSom()">
+        <option value="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3">Som 1: Sirene</option>
+        <option value="https://www.soundjay.com/buttons/beep-01a.mp3">Som 2: Beep Digital</option>
+        <option value="https://www.soundjay.com/buttons/button-10.mp3">Som 3: Clique</option>
+        <option value="https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3">Som 4: Urgente</option>
+        <option value="https://www.soundjay.com/communication/phone-ring-01.mp3">Som 5: Telefone</option>
+        <option value="https://www.soundjay.com/misc/bell-ringing-01.mp3">Som 6: Sino</option>
+        <option value="https://assets.mixkit.co/active_storage/sfx/2190/2190-preview.mp3">Som 7: Reverb</option>
+        <option value="https://www.soundjay.com/nature/rain-01.mp3">Som 8: Eco</option>
+        <option value="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3">Som 9: Game Over</option>
+        <option value="https://assets.mixkit.co/active_storage/sfx/1014/1014-preview.mp3">Som 10: Tecnologia</option>
+    </select>
+    <button onclick="testarSom()">Testar Som</button>
+    <hr style="border:0; border-top:1px solid #334155; margin: 20px 0;">
+    <p style="font-size: 0.8rem; color: #64748b;">ID do Host: <br><strong id="my-id">...</strong></p>
+</div>
+
+<div class="main">
+    <h2>📡 Monitor de Chamados</h2>
+    <div id="listaAlertas"></div>
+</div>
+
+<audio id="audioPlayer"></audio>
+
+<script>
+    const peer = new Peer('meu-host-unico-p2p'); // ID FIXO
+    const audio = document.getElementById('audioPlayer');
+
+    peer.on('open', id => document.getElementById('my-id').innerText = id);
+
+    peer.on('connection', conn => {
+        conn.on('data', data => {
+            // Tocar som configurado
+            audio.src = document.getElementById('selectSom').value;
+            audio.play();
+
+            const lista = document.getElementById('listaAlertas');
+            const div = document.createElement('div');
+            div.className = 'alert-item';
+            
+            let conteudoExtra = '';
+            if(data.tipo === 'video') {
+                conteudoExtra = `<div class="media-content"><video src="${data.url}" controls></video></div>`;
+            } else if(data.tipo === 'pdf') {
+                conteudoExtra = `<a class="pdf-link" href="${data.url}" target="_blank">📄 Abrir Documento PDF</a>`;
+            }
+
+            div.innerHTML = `
+                <small>${new Date().toLocaleTimeString()}</small>
+                <p><strong>Mensagem:</strong> ${data.texto}</p>
+                ${conteudoExtra}
+            `;
+            lista.prepend(div);
+        });
+    });
+
+    function salvarSom() { localStorage.setItem('som_preferido', document.getElementById('selectSom').value); }
+    function testarSom() { audio.src = document.getElementById('selectSom').value; audio.play(); }
+    
+    // Carregar som salvo
+    if(localStorage.getItem('som_preferido')) {
+        document.getElementById('selectSom').value = localStorage.getItem('som_preferido');
+    }
+</script>
+</body>
+  </html>
+  
