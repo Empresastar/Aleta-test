@@ -2,118 +2,87 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Host Monitor Pro - Dark Neon</title>
+    <title>Host Monitor - Som Fixo</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root { --bg: #050505; --card: #0f172a; --neon: #38bdf8; --text: #f1f5f9; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; }
         
-        /* Configurações Lateral */
-        .sidebar { width: 280px; background: #020617; padding: 25px; border-right: 1px solid #1e293b; display: flex; flex-direction: column; }
-        .sidebar h3 { color: var(--neon); text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem; }
-        
-        /* Área Principal */
-        .main { flex: 1; padding: 40px; overflow-y: auto; background: radial-gradient(circle at top right, #0c1e33, #050505); }
-        .feed { max-width: 700px; margin: 0 auto; }
+        .sidebar { width: 260px; background: #020617; padding: 25px; border-right: 1px solid #1e293b; }
+        .main { flex: 1; padding: 40px; overflow-y: auto; background: #050505; }
+        .feed { max-width: 650px; margin: 0 auto; }
 
-        /* Estilo dos Cards de Alerta */
         .alert-card { 
             background: var(--card); border: 1px solid #1e293b; border-radius: 16px; 
             padding: 20px; margin-bottom: 20px; border-left: 5px solid var(--neon);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4); animation: emerge 0.4s ease;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4); animation: pop 0.3s ease;
         }
-        @keyframes emerge { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes pop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
-        /* Botão Azul para Abrir Arquivos */
-        .btn-open { 
+        .btn-blue { 
             display: inline-block; margin-top: 15px; padding: 12px 24px; 
             background: var(--neon); color: #000; font-weight: bold; 
-            border-radius: 8px; text-decoration: none; transition: 0.3s;
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+            border-radius: 8px; text-decoration: none; box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
         }
-        .btn-open:hover { transform: translateY(-2px); box-shadow: 0 0 25px var(--neon); }
-
-        select, .btn-test { 
-            width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; 
-            background: #1e293b; color: white; border: 1px solid #334155; cursor: pointer;
-        }
-        .id-badge { font-family: monospace; background: #000; padding: 8px; border-radius: 5px; color: #10b981; font-size: 0.8rem; }
+        .status-on { color: #10b981; font-weight: bold; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <h3>⚙️ Sons de Alerta</h3>
-    <select id="somSelect" onchange="localStorage.setItem('som_p2p', this.value)">
-        <option value="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3">Som 1: Sirene Industrial</option>
-        <option value="https://www.soundjay.com/buttons/beep-01a.mp3">Som 2: Beep Digital</option>
-        <option value="https://www.soundjay.com/buttons/button-10.mp3">Som 3: Alerta Curto</option>
-        <option value="https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3">Som 4: Urgência Máxima</option>
-        <option value="https://www.soundjay.com/communication/phone-ring-01.mp3">Som 5: Ringtone</option>
-        <option value="https://assets.mixkit.co/active_storage/sfx/2190/2190-preview.mp3">Som 6: Eco Espacial</option>
-        <option value="https://www.soundjay.com/misc/bell-ringing-01.mp3">Som 7: Sino Notificação</option>
-        <option value="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3">Som 8: Game Alerta</option>
-        <option value="https://assets.mixkit.co/active_storage/sfx/1014/1014-preview.mp3">Som 9: Tech Reveal</option>
-        <option value="https://www.soundjay.com/nature/rain-01.mp3">Som 10: Pulso Radar</option>
-    </select>
-    <button class="btn-test" onclick="document.getElementById('player').play()">🔈 Testar Som Selecionado</button>
-    
-    <div style="margin-top:auto">
-        <p>Status: <span id="st-text" style="color:#10b981">Conectando...</span></p>
-        <p>ID do Host:</p>
-        <div class="id-badge">meu-host-fixo-p2p</div>
-    </div>
+    <h3 style="color:var(--neon)">SISTEMA ATIVO</h3>
+    <p>Status: <span class="status-on">● ONLINE</span></p>
+    <p style="font-size: 0.8rem; color: #64748b;">ID de Conexão:<br><b style="color:white">meu-host-fixo-p2p</b></p>
+    <hr style="border:0; border-top:1px solid #1e293b; margin: 20px 0;">
+    <button onclick="testarSom()" style="width:100%; padding:10px; cursor:pointer; background:#1e293b; color:white; border:1px solid #334155; border-radius:5px;">🔈 Testar Som</button>
 </div>
 
 <div class="main">
     <div class="feed" id="feed">
-        <h1 style="color: var(--neon)">Monitor de Chamados</h1>
-        <p style="color: #64748b">As mensagens do chefe aparecerão aqui embaixo.</p>
-        <hr border="0" style="border-top: 1px solid #1e293b; margin: 30px 0;">
+        <h1 style="color: var(--neon)">Alertas Recebidos</h1>
+        <p id="vazio" style="color:#475569">Aguardando chamado do chefe...</p>
     </div>
 </div>
 
-<audio id="player"></audio>
+<audio id="audioPlayer" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
 <script>
-    const player = document.getElementById('player');
-    const somSelect = document.getElementById('somSelect');
-
-    // Recupera som salvo
-    if(localStorage.getItem('som_p2p')) somSelect.value = localStorage.getItem('som_p2p');
-
-    const peer = new Peer('meu-host-fixo-p2p'); // ID ÚNICO
-
-    peer.on('open', () => document.getElementById('st-text').innerText = "● ONLINE");
+    const audio = document.getElementById('audioPlayer');
+    const peer = new Peer('meu-host-fixo-p2p');
 
     peer.on('connection', (conn) => {
         conn.on('data', (data) => {
-            // Tocar o som
-            player.src = somSelect.value;
-            player.play();
+            // Tocar som fixo
+            audio.currentTime = 0;
+            audio.play().catch(e => console.log("Clique na página para ativar o som"));
 
-            // Criar Alerta
+            // Remover texto de vazio
+            if(document.getElementById('vazio')) document.getElementById('vazio').remove();
+
+            // Criar o Card
             const feed = document.getElementById('feed');
             const card = document.createElement('div');
             card.className = 'alert-card';
             
-            let acaoAzul = '';
+            let botaoAzul = '';
             if(data.url) {
-                const label = data.tipo === 'pdf' ? 'ABRIR PDF RECEBIDO' : 'ABRIR VÍDEO/LINK';
-                acaoAzul = `<a href="${data.url}" target="_blank" class="btn-open">${label}</a>`;
+                const textoBotao = data.tipo === 'pdf' ? 'ABRIR DOCUMENTO PDF' : 'VER VÍDEO / LINK';
+                botaoAzul = `<a href="${data.url}" target="_blank" class="btn-blue">${textoBotao}</a>`;
             }
 
             card.innerHTML = `
-                <div style="display:flex; justify-content:space-between; color:var(--neon); font-size:0.8rem; font-weight:bold; margin-bottom:10px;">
-                    <span>🚨 NOVO CHAMADO</span>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.75rem; color:var(--neon)">
+                    <span>⚠️ NOVO ALERTA</span>
                     <span>${new Date().toLocaleTimeString()}</span>
                 </div>
-                <p style="font-size:1.2rem; margin:0;">${data.texto}</p>
-                ${acaoAzul}
+                <p style="font-size:1.1rem; margin:0;">${data.texto}</p>
+                ${botaoAzul}
             `;
             feed.prepend(card);
         });
     });
+
+    function testarSom() { audio.play(); }
 </script>
 </body>
 </html>
